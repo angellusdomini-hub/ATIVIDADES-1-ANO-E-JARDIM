@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratório do Teclado - 1º Ano</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e8f6ff,#fff8d6,#e8fff1);color:#15324a}
+header{background:linear-gradient(90deg,#1f66c2,#23a65b);color:white;text-align:center;padding:16px 10px;border-bottom:8px solid #ffd84d}
+header h1{margin:0;font-size:32px}
+header p{margin:5px 0;font-size:17px}
+main{max-width:1220px;margin:18px auto 42px;padding:0 12px}
+.card{background:white;border:4px solid #d7ecff;border-radius:24px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.13)}
+.oculto{display:none!important}
+button{border:0;border-radius:16px;padding:13px 18px;margin:5px;font-size:19px;font-weight:900;color:white;background:#2378df;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.16)}
+button:hover{transform:translateY(-1px);filter:brightness(1.06)}
+button:disabled{background:#9faaba;cursor:not-allowed;box-shadow:none;transform:none}
+.sec{background:#667085}.warn{background:#df8b1f}.okbtn{background:#239b56}.print{background:#7438d1}
+.info{background:#fff8d6;border:3px solid #f5cf43;border-radius:18px;padding:12px;font-size:18px;line-height:1.35}
+.inicio-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+@media(max-width:850px){.inicio-grid{grid-template-columns:1fr}}
+.lista-alunos{display:grid;grid-template-columns:repeat(2,minmax(190px,1fr));gap:10px;margin-top:10px}
+@media(max-width:700px){.lista-alunos{grid-template-columns:1fr}}
+.aluno{border:4px solid #d4e8ff;background:#f3f9ff;padding:13px;border-radius:18px;text-align:center;font-size:23px;font-weight:900;cursor:pointer;user-select:none}
+.aluno:hover{transform:scale(1.02)}
+.aluno.sel{outline:6px solid #ffd84d;background:#fff6c2}
+.aluno .menor{display:block;font-size:12px;color:#456;font-weight:700;margin-top:4px}
+.nomeConfirmacao{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{max-width:720px;width:100%;background:white;border-radius:24px;padding:22px;border:6px solid #ffd84d;text-align:center}
+.modal h2{margin-top:0;font-size:28px}
+.modal input{width:100%;font-size:31px;text-align:center;padding:14px;border:4px solid #87c3ff;border-radius:16px;margin:10px 0;font-weight:900;text-transform:uppercase}
+.painel{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center}
+.badge{background:#eef7ff;border:3px solid #c5e2ff;padding:9px 12px;border-radius:15px;font-size:17px;font-weight:900}
+.etapas{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:13px 0}
+@media(max-width:900px){.etapas{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.etapas{grid-template-columns:repeat(2,1fr)}}
+.etapa{background:#edf2f7;border:2px solid #c9d3df;padding:7px 4px;text-align:center;border-radius:12px;font-size:12px;font-weight:900}
+.etapa.ativa{background:#ffe36d;border-color:#d99b00}
+.etapa.feita{background:#bcf3ce;border-color:#2fae5f}
+.area{min-height:540px;border:5px dashed #9dccff;border-radius:22px;background:#f8fcff;padding:16px;position:relative;overflow:hidden}
+.instrucao{text-align:center;font-size:27px;font-weight:900;color:#124f88;margin-bottom:6px}
+.sub{text-align:center;color:#506070;font-size:19px;font-weight:800;margin-bottom:12px}
+.feedback{min-height:36px;text-align:center;font-size:23px;font-weight:900;margin-top:10px}
+.bom{color:#188a44}.erro{color:#c02828}
+.aviso{max-width:920px;margin:12px auto;background:#fff8d6;border:3px solid #ffd84d;border-radius:18px;padding:12px;text-align:center;font-size:19px;font-weight:900}
+.teclado{max-width:980px;margin:16px auto;background:#dce6f2;border:4px solid #9fb5cc;border-radius:20px;padding:12px}
+.linha{display:flex;justify-content:center;gap:7px;margin:7px 0;flex-wrap:nowrap}
+.tecla{min-width:48px;min-height:48px;border:3px solid #6c7f95;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;box-shadow:0 4px 0 #b5c0cc;user-select:none;cursor:pointer;position:relative}
+.tecla.num{background:#f5f0ff}
+.tecla.vogal{background:#e9fff0}
+.tecla.consoante{background:#eaf4ff}
+.tecla.esq{border-color:#2f80ed}
+.tecla.dir{border-color:#e84393}
+.tecla.funcao{background:#fff1df}
+.tecla.enter{min-width:112px;background:#e8fff0}
+.tecla.shift{min-width:105px;background:#fff0dc}
+.tecla.backspace,.tecla.delete{min-width:125px;background:#ffe8e8}
+.tecla.caps{min-width:115px;background:#fff0dc}
+.tecla.tab{min-width:75px;background:#edf2f7}
+.tecla.space{min-width:340px}
+.tecla.alvo{outline:7px solid #ffd84d;background:#fff3a6}
+.tecla.ok{background:#bdf2cd!important;border-color:#239b56!important;box-shadow:0 4px 0 #7ebd91}
+.tecla.err{background:#ffdcdc!important;border-color:#c02828!important}
+.legenda{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px auto;font-weight:900}
+.legenda span{border-radius:12px;padding:7px 10px;border:2px solid #cbd5e1;background:white}
+.modelo{font-size:48px;font-weight:900;text-align:center;background:#fff8d6;border:4px solid #ffd84d;border-radius:18px;padding:15px;margin:14px auto;max-width:850px;letter-spacing:5px}
+.modelo.frase{font-size:34px;letter-spacing:1px;line-height:1.35}
+.digitacao{max-width:900px;margin:auto;text-align:center}
+.digitacao input{width:100%;max-width:720px;padding:15px;border:5px solid #87c3ff;border-radius:18px;font-size:40px;font-weight:900;text-align:center}
+.digitacao textarea{width:100%;max-width:780px;min-height:110px;resize:none;padding:15px;border:5px solid #87c3ff;border-radius:18px;font-size:31px;font-weight:800;text-align:center}
+.grade{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:14px auto}
+.opcao{min-width:120px;min-height:86px;border:4px solid #bddbff;background:#eef7ff;border-radius:20px;padding:12px;font-size:32px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;text-align:center}
+.opcao.palavra{font-size:24px;min-width:170px}
+.opcao.ok{background:#bbf1cd;border-color:#239b56}
+.opcao.err{background:#ffdcdc;border-color:#c02828}
+.caixaTexto{max-width:850px;margin:16px auto;background:#eef7ff;border:4px solid #bddbff;border-radius:18px;padding:15px;font-size:34px;font-weight:900;text-align:center;letter-spacing:3px;min-height:78px}
+.cursor{display:inline-block;padding:0 5px;background:#ffd84d;border-radius:6px}
+.relatorio{overflow-x:auto;margin-top:18px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid #b8c7d9;padding:8px;text-align:left;vertical-align:top}
+th{background:#1668c7;color:white}
+tr:nth-child(even){background:#f4f8fc}
+kbd{background:#eef2f7;border:2px solid #9fb5cc;border-radius:7px;padding:2px 6px;font-weight:900}
+@media(max-width:760px){.tecla{min-width:34px;min-height:40px;font-size:18px}.tecla.larga,.tecla.enter,.tecla.shift,.tecla.backspace,.tecla.delete,.tecla.caps{min-width:70px}.tecla.space{min-width:200px}}
+@media print{header,#telaInicio,#telaJogo,button{display:none!important}body{background:white}.card{box-shadow:none;border:none}main{max-width:100%;margin:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Laboratório do Teclado</h1>
+  <p>Conhecendo letras, números e teclas especiais — 1º Ano do Ensino Fundamental</p>
+  <p><strong>UNIVERSITAS, E-EI EF - 2026-1</strong> · CURSO FUNDAMENTAL 1/5 ANOS - 1º Ano - Tarde - A · EDUCAÇÃO DIGITAL E COMPUTAÇÃO - 2º Bimestre</p>
+</header>
+
+<main>
+<section class="card" id="telaInicio">
+  <h2>Escolha o aluno</h2>
+  <div class="inicio-grid">
+    <div>
+      <div class="lista-alunos" id="listaAlunos"></div>
+      <div style="text-align:center;margin-top:14px">
+        <button id="btnAbrirNome" onclick="abrirConfirmacao()" disabled>Escrever meu nome</button>
+      </div>
+    </div>
+    <div class="info">
+      <strong>Objetivo da aula:</strong><br>
+      Explorar de forma mais completa o teclado:
+      <br><br>
+      ✅ posição das letras por fileira;<br>
+      ✅ vogais e consoantes;<br>
+      ✅ números;<br>
+      ✅ mão esquerda e mão direita;<br>
+      ✅ barra de espaço;<br>
+      ✅ ENTER, SHIFT, CAPS LOCK, BACKSPACE e DELETE;<br>
+      ✅ digitação de letras, sílabas, palavras e frases curtas.
+      <br><br>
+      <strong>Duração sugerida:</strong> 40 minutos.
+    </div>
+  </div>
+</section>
+
+<div class="nomeConfirmacao oculto" id="modalNome">
+  <div class="modal">
+    <h2>Escreva seu primeiro nome</h2>
+    <p>Olhe o modelo e digite seu nome.</p>
+    <div class="modelo" id="modeloNome">NOME</div>
+    <input id="inputNome" type="text" autocomplete="off" placeholder="DIGITE AQUI">
+    <div id="avisoNome" class="feedback"></div>
+    <button class="okbtn" onclick="confirmarNome()">Começar atividade</button>
+    <button class="sec" onclick="fecharConfirmacao()">Voltar</button>
+  </div>
+</div>
+
+<section class="card oculto" id="telaJogo">
+  <div class="painel">
+    <div class="badge">Aluno: <span id="alunoPainel">---</span></div>
+    <div class="badge">Fase: <span id="faseAtual">1</span>/<span id="totalFases">32</span></div>
+    <div class="badge">Pontos: <span id="pontos">0</span></div>
+    <div class="badge">Erros na fase: <span id="errosFase">0</span></div>
+  </div>
+  <div class="etapas" id="etapas"></div>
+  <div class="area" id="area"></div>
+  <div class="feedback" id="feedback"></div>
+  <div style="text-align:center;margin-top:14px">
+    <button class="sec" onclick="voltarFase()">Voltar</button>
+    <button class="warn" onclick="repetirFase()">Reiniciar fase</button>
+    <button id="btnProxima" onclick="proximaFase()" disabled>Próxima fase</button>
+  </div>
+</section>
+
+<section class="card oculto" id="telaResultado">
+  <div style="text-align:center;font-size:20px;line-height:1.45">
+    <div style="font-size:58px">⌨️</div>
+    <h2>Atividade concluída!</h2>
+    <p><strong>Aluno:</strong> <span id="nomeResultado"></span></p>
+    <p><strong>Pontuação:</strong> <span id="pontuacaoFinal"></span> de <span id="maxPontos"></span></p>
+    <p><strong>Nível geral:</strong> <span id="nivelFinal"></span></p>
+    <button class="print" onclick="window.print()">Imprimir ou salvar relatório em PDF</button>
+    <button onclick="reiniciarTudo()">Fazer novamente</button>
+  </div>
+  <div class="relatorio">
+    <h3>Relatório de proficiência</h3>
+    <div id="dadosGerais"></div>
+    <table>
+      <thead>
+        <tr><th>Fase</th><th>Habilidade observada</th><th>Tempo</th><th>Acertos</th><th>Erros</th><th>Nível</th><th>Observação pedagógica</th></tr>
+      </thead>
+      <tbody id="corpoRelatorio"></tbody>
+    </table>
+    <div class="info" id="sinteseProfessor"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const alunos=[
+ {primeiro:'ANA RAFAELA', completo:'ANA RAFAELA JACOB FERREIRA', cor:'#e84393'},
+ {primeiro:'ANTONELA', completo:'ANTONELA GRANADO FERREIRA DA SILVA', cor:'#8e44ad'},
+ {primeiro:'BENICIO', completo:'BENICIO JOFRE BUENO', cor:'#2f80ed'},
+ {primeiro:'EDSON', completo:'EDSON FILHO DOS SANTOS CARVALHO', cor:'#e67e22'},
+ {primeiro:'GABRIEL', completo:'GABRIEL GONÇALVES MARCELINO', cor:'#27ae60'},
+ {primeiro:'ISIS', completo:'ISIS ELIZABETH ANACRETO SETTI', cor:'#c0392b'},
+ {primeiro:'MARIA LUIZA', completo:'MARIA LUIZA TICCHINI DA CRUZ', cor:'#16a085'},
+ {primeiro:'RAQUEL', completo:'RAQUEL FIUZA DAMIÃO', cor:'#d35400'},
+ {primeiro:'VALENTINA', completo:'VALENTINA FIGUEIREDO PULCINELLI', cor:'#9b59b6'},
+ {primeiro:'HELENA', completo:'HELENA SIMÕES ALVES', cor:'#1f77b4'}
+];
+
+const TOTAL=32, PONTOS=2;
+const nomesFases={
+ 1:'Mapa do teclado',2:'Números',3:'Vogais',4:'Consoantes',5:'Linha superior',6:'Linha do meio',7:'Linha inferior',8:'Mão esquerda',9:'Mão direita',10:'Letras do nome',11:'Caça-teclas',12:'Letras vizinhas',
+ 13:'Digite letras',14:'Digite vogais',15:'Digite consoantes',16:'Digite sílabas',17:'Digite palavras',18:'Barra de espaço',19:'ENTER confirma',20:'ENTER pula linha',
+ 21:'SHIFT maiúscula',22:'SHIFT símbolos',23:'CAPS LOCK',24:'Nome com maiúscula',25:'Backspace final',26:'Backspace sílabas',27:'DELETE depois',28:'DELETE no meio',
+ 29:'Cursor e setas',30:'Função das teclas',31:'Nome completo',32:'Desafio final'
+};
+const metas={1:1,2:10,3:5,4:12,5:10,6:9,7:7,8:12,9:12,10:8,11:14,12:8,13:8,14:5,15:8,16:8,17:7,18:5,19:6,20:3,21:6,22:5,23:2,24:1,25:5,26:5,27:5,28:5,29:4,30:10,31:1,32:16};
+
+let alunoSelecionado=null,nomeDigitado='',fase=1,pontos=0,inicioFase=null,relatorio={},teclasVirtuais={};
+
+const linhasTeclado=[
+ ['1','2','3','4','5','6','7','8','9','0','BACKSPACE'],
+ ['Q','W','E','R','T','Y','U','I','O','P'],
+ ['CAPS','A','S','D','F','G','H','J','K','L','ENTER'],
+ ['SHIFT','Z','X','C','V','B','N','M','DELETE'],
+ ['ESPAÇO']
+];
+const vogais=['A','E','I','O','U'];
+const consoantes=['B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Y','Z'];
+const esquerda=['Q','W','E','R','T','A','S','D','F','G','Z','X','C','V','B'];
+const direita=['Y','U','I','O','P','H','J','K','L','N','M'];
+const numeros=['1','2','3','4','5','6','7','8','9','0'];
+
+function norm(t){return (t||'').trim().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();}
+function embaralhar(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function tempo(s){s=Math.round(Math.max(0,s));let m=Math.floor(s/60),r=s%60;return m?m+'min '+String(r).padStart(2,'0')+'s':r+'s';}
+function cap(n){return n.toLowerCase().split(' ').map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ')}
+
+function montarAlunos(){
+ const box=document.getElementById('listaAlunos'); box.innerHTML='';
+ alunos.forEach(a=>{
+   const d=document.createElement('div');d.className='aluno';d.style.color=a.cor;
+   d.innerHTML=a.primeiro+'<span class="menor">clique no seu nome</span>';
+   d.onclick=()=>{alunoSelecionado=a;document.querySelectorAll('.aluno').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');document.getElementById('btnAbrirNome').disabled=false};
+   box.appendChild(d);
+ });
+}
+function abrirConfirmacao(){if(!alunoSelecionado)return;document.getElementById('modeloNome').textContent=alunoSelecionado.primeiro;document.getElementById('modeloNome').style.color=alunoSelecionado.cor;document.getElementById('inputNome').value='';document.getElementById('avisoNome').innerHTML='';document.getElementById('modalNome').classList.remove('oculto');setTimeout(()=>document.getElementById('inputNome').focus(),100)}
+function fecharConfirmacao(){document.getElementById('modalNome').classList.add('oculto')}
+function confirmarNome(){
+ const val=document.getElementById('inputNome').value;
+ if(norm(val)!==norm(alunoSelecionado.primeiro)){document.getElementById('avisoNome').innerHTML='<span class="erro">Tente escrever igual ao modelo.</span>';document.getElementById('inputNome').select();return}
+ nomeDigitado=val.trim().toUpperCase();fecharConfirmacao();iniciar();
+}
+function iniciar(){pontos=0;fase=1;criarRelatorio();document.getElementById('alunoPainel').textContent=alunoSelecionado.completo;document.getElementById('telaInicio').classList.add('oculto');document.getElementById('telaJogo').classList.remove('oculto');montarEtapas();mostrarFase()}
+function criarRelatorio(){relatorio={};for(let i=1;i<=TOTAL;i++)relatorio[i]={fase:i,nome:nomesFases[i],tempo:0,acertos:0,erros:0,concluida:false,repeticoes:0}}
+function montarEtapas(){const e=document.getElementById('etapas');e.innerHTML='';for(let i=1;i<=TOTAL;i++){const d=document.createElement('div');d.id='e'+i;d.className='etapa';d.textContent=i+'. '+nomesFases[i].split(' ')[0];e.appendChild(d)}}
+function iniciarTempo(){inicioFase=Date.now()}
+function atualizarTempo(){if(inicioFase){relatorio[fase].tempo+=Math.round((Date.now()-inicioFase)/1000);inicioFase=Date.now()}}
+function atualizarPainel(){document.getElementById('faseAtual').textContent=fase;document.getElementById('pontos').textContent=pontos;document.getElementById('errosFase').textContent=relatorio[fase]?.erros||0;for(let i=1;i<=TOTAL;i++){const el=document.getElementById('e'+i);if(!el)continue;el.className='etapa';if(i<fase)el.classList.add('feita');if(i===fase)el.classList.add('ativa')}}
+function feedback(msg){document.getElementById('feedback').innerHTML=msg}
+function acerto(q=1){relatorio[fase].acertos+=q;atualizarPainel()}
+function erro(msg='Tente novamente com calma.'){relatorio[fase].erros++;feedback('<span class="erro">'+msg+'</span>');atualizarPainel()}
+function concluir(msg='Muito bem! Fase concluída.'){if(relatorio[fase].concluida)return;atualizarTempo();relatorio[fase].concluida=true;pontos+=PONTOS;document.getElementById('btnProxima').disabled=false;feedback('<span class="bom">'+msg+'</span>');atualizarPainel()}
+function limpar(){document.getElementById('area').innerHTML='';feedback('');document.getElementById('btnProxima').disabled=!relatorio[fase]?.concluida;atualizarPainel()}
+function mostrarFase(){limpar();iniciarTempo();({1:fase1,2:fase2,3:fase3,4:fase4,5:fase5,6:fase6,7:fase7,8:fase8,9:fase9,10:fase10,11:fase11,12:fase12,13:fase13,14:fase14,15:fase15,16:fase16,17:fase17,18:fase18,19:fase19,20:fase20,21:fase21,22:fase22,23:fase23,24:fase24,25:fase25,26:fase26,27:fase27,28:fase28,29:fase29,30:fase30,31:fase31,32:fase32}[fase])()}
+function proximaFase(){if(!relatorio[fase].concluida)return;if(fase<TOTAL){fase++;mostrarFase()}else finalizar()}
+function voltarFase(){if(fase>1){atualizarTempo();fase--;mostrarFase()}}
+function repetirFase(){atualizarTempo();relatorio[fase].repeticoes++;relatorio[fase].acertos=0;relatorio[fase].erros=0;relatorio[fase].concluida=false;mostrarFase()}
+
+function criarTeclado(callback, destaque=[]){
+ teclasVirtuais={};
+ const div=document.createElement('div');div.className='teclado';
+ linhasTeclado.forEach(linha=>{
+   const row=document.createElement('div');row.className='linha';
+   linha.forEach(t=>{
+     const k=document.createElement('div');k.className='tecla';k.textContent=t;k.dataset.tecla=t;
+     if(numeros.includes(t))k.classList.add('num');
+     if(vogais.includes(t))k.classList.add('vogal');
+     if(consoantes.includes(t))k.classList.add('consoante');
+     if(esquerda.includes(t))k.classList.add('esq');
+     if(direita.includes(t))k.classList.add('dir');
+     if(['ENTER','SHIFT','BACKSPACE','DELETE','CAPS','ESPAÇO'].includes(t))k.classList.add('funcao');
+     if(t==='ENTER')k.classList.add('enter'); if(t==='SHIFT')k.classList.add('shift'); if(t==='BACKSPACE')k.classList.add('backspace'); if(t==='DELETE')k.classList.add('delete'); if(t==='CAPS')k.classList.add('caps'); if(t==='ESPAÇO')k.classList.add('space');
+     if(destaque.includes(t))k.classList.add('alvo');
+     k.onclick=()=>callback&&callback(t,k);
+     teclasVirtuais[t]=k;row.appendChild(k);
+   });
+   div.appendChild(row);
+ });
+ return div;
+}
+function marcarAlvo(t){Object.values(teclasVirtuais).forEach(k=>k.classList.remove('alvo'));if(teclasVirtuais[t])teclasVirtuais[t].classList.add('alvo')}
+function piscarErro(k){k.classList.add('err');setTimeout(()=>k.classList.remove('err'),400)}
+
+function fase1(){
+ const a=document.getElementById('area');
+ a.innerHTML='<div class="instrucao">Mapa do teclado</div><div class="sub">Observe as regiões do teclado.</div><div class="legenda"><span>🟣 Números</span><span>🟢 Vogais</span><span>🔵 Consoantes</span><span>🟦 Mão esquerda</span><span>🌸 Mão direita</span><span>🟠 Teclas especiais</span></div><div class="aviso">Professor: peça aos alunos para apontarem onde ficam letras, números, espaço, ENTER, SHIFT, BACKSPACE e DELETE.</div>';
+ a.appendChild(criarTeclado(()=>{}));
+ a.innerHTML += '<div style="text-align:center"><button class="okbtn" onclick="acerto();concluir(\'Mapa observado!\')">Já observei o teclado</button></div>';
+}
+function treinoVirtual(titulo,sub,lista){
+ let i=0;const a=document.getElementById('area');
+ a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+'</div><div class="modelo" id="modeloLetra">'+lista[0]+'</div>';
+ a.appendChild(criarTeclado((t,k)=>{if(t===lista[i]){k.classList.add('ok');acerto();i++;if(i>=lista.length)concluir('Você encontrou todas as teclas!');else{document.getElementById('modeloLetra').textContent=lista[i];marcarAlvo(lista[i])}}else{piscarErro(k);erro('Procure a tecla mostrada no quadro amarelo.')}},[lista[0]]));
+}
+function fase2(){treinoVirtual('Números do teclado','Clique nos números na ordem pedida.',numeros)}
+function fase3(){treinoVirtual('Vogais no teclado','Clique nas vogais.',vogais)}
+function fase4(){treinoVirtual('Consoantes no teclado','Clique nas consoantes pedidas.',embaralhar([...consoantes]).slice(0,12))}
+function fase5(){treinoVirtual('Linha superior','Clique nas teclas da fileira QWERTY.',['Q','W','E','R','T','Y','U','I','O','P'])}
+function fase6(){treinoVirtual('Linha do meio','Clique nas letras da fileira do meio.',['A','S','D','F','G','H','J','K','L'])}
+function fase7(){treinoVirtual('Linha inferior','Clique nas letras da fileira de baixo.',['Z','X','C','V','B','N','M'])}
+function fase8(){treinoVirtual('Mão esquerda','Clique nas letras que ficam mais para a esquerda.',embaralhar([...esquerda]).slice(0,12))}
+function fase9(){treinoVirtual('Mão direita','Clique nas letras que ficam mais para a direita.',embaralhar([...direita]).concat(['Y']).slice(0,12))}
+function fase10(){const letras=alunoSelecionado.primeiro.replace(/\s+/g,'').split('').map(x=>norm(x)).filter(x=>/^[A-Z]$/.test(x)).slice(0,8);treinoVirtual('Letras do seu nome','Clique nas letras do seu primeiro nome.',letras)}
+function fase11(){treinoVirtual('Caça-teclas misturado','Ache letras e números misturados.',embaralhar(['A','1','B','2','C','3','M','4','P','5','G','6','L','7']).slice(0,14))}
+function fase12(){paresClique('Letras vizinhas','Junte letras que ficam perto no teclado.',[['Q','W'],['E','R'],['T','Y'],['U','I'],['A','S'],['D','F'],['G','H'],['J','K']])}
+
+function digitacaoLista(titulo,sub,lista,textarea=false){
+ let i=0;
+ function mostrar(){
+  const input=textarea?'<textarea id="campoDig" autocomplete="off"></textarea>':'<input id="campoDig" autocomplete="off">';
+  const a=document.getElementById('area');
+  a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+' Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo '+(textarea?'frase':'')+'">'+lista[i]+'</div>'+input+'<br><br><button class="okbtn" onclick="window.verificaDig()">Conferir</button></div>';
+  const inp=document.getElementById('campoDig');inp.focus();inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!textarea)window.verificaDig()});
+ }
+ window.verificaDig=function(){const val=document.getElementById('campoDig').value;if(norm(val)===norm(lista[i])){acerto();i++;if(i>=lista.length)concluir('Digitação concluída!');else{feedback('<span class="bom">Certo!</span>');setTimeout(mostrar,300)}}else{erro('Digite igual ao modelo.');document.getElementById('campoDig').select()}};
+ mostrar();
+}
+function fase13(){digitacaoLista('Digite letras','Digite a letra igual ao modelo.',['A','B','C','M','P','G','L','V'])}
+function fase14(){digitacaoLista('Digite vogais','Digite as vogais.',['A','E','I','O','U'])}
+function fase15(){digitacaoLista('Digite consoantes','Digite as consoantes pedidas.',['B','C','D','F','G','L','M','P'])}
+function fase16(){digitacaoLista('Digite sílabas','Digite sílabas simples.',['BA','BE','BI','BO','BU','PA','PE','PI'])}
+function fase17(){digitacaoLista('Digite palavras','Digite palavras curtas.',['BOLA','CASA','GATO','PATO','DADO','MALA','DEDO'])}
+function fase18(){digitacaoLista('Barra de espaço','Copie usando espaço entre as palavras.',['EU JOGO','MEU NOME','BOLA AZUL','TECLA ENTER','AULA DE TECLADO'])}
+function fase19(){
+ let i=0;const lista=['A','B','C','1','2','3'];const a=document.getElementById('area');
+ function mostrar(){a.innerHTML='<div class="instrucao">ENTER confirma</div><div class="sub">Digite o modelo e aperte ENTER. Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo">'+lista[i]+'</div><input id="campoEnter" autocomplete="off"><div class="aviso">Depois de digitar, pressione <kbd>ENTER</kbd>.</div></div>';const inp=document.getElementById('campoEnter');inp.focus();inp.addEventListener('keydown',e=>{if(e.key==='Enter'){if(norm(inp.value)===norm(lista[i])){acerto();i++;if(i>=lista.length)concluir('Você usou ENTER para confirmar!');else mostrar()}else{erro('Digite igual antes de apertar ENTER.');inp.select()}}})}
+ mostrar();
+}
+function fase20(){const a=document.getElementById('area');a.innerHTML='<div class="instrucao">ENTER pula linha</div><div class="sub">Digite A, ENTER, B, ENTER, C.</div><div class="digitacao"><div class="modelo frase">A<br>B<br>C</div><textarea id="campoLinha"></textarea><br><br><button class="okbtn" onclick="confereLinhas()">Conferir</button></div>';document.getElementById('campoLinha').focus()}
+function confereLinhas(){const v=document.getElementById('campoLinha').value.replace(/\r/g,'').trim();if(norm(v)===norm('A\nB\nC')){acerto(3);concluir('Você usou ENTER para pular linha!')}else{erro('Cada letra precisa ficar em uma linha.');document.getElementById('campoLinha').focus()}}
+function fase21(){digitacaoComRegra('SHIFT maiúscula','Use SHIFT para fazer letras maiúsculas.',['A','B','M','P','G','L'],v=>v.length===1&&v===v.toUpperCase()&&/[A-Z]/.test(v),'Precisa ser letra maiúscula. Use SHIFT.')}
+function fase22(){digitacaoComRegra('SHIFT e símbolos','Digite os símbolos de cima: ! @ # $ %.',['!','@','#','$','%'],v=>v,'Use SHIFT junto com o número para formar o símbolo.')}
+function digitacaoComRegra(titulo,sub,lista,regra,msgErro){let i=0;function mostrar(){const a=document.getElementById('area');a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+' Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo">'+lista[i]+'</div><input id="campoRegra" autocomplete="off"><div class="aviso">Observe o modelo e use o teclado real.</div><br><button class="okbtn" onclick="window.confereRegra()">Conferir</button></div>';document.getElementById('campoRegra').focus()}window.confereRegra=function(){const val=document.getElementById('campoRegra').value;if(val===lista[i]){acerto();i++;if(i>=lista.length)concluir('Você conseguiu!');else mostrar()}else{erro(msgErro);document.getElementById('campoRegra').select()}};mostrar()}
+function fase23(){
+ const a=document.getElementById('area');
+ a.innerHTML='<div class="instrucao">CAPS LOCK</div><div class="sub">Ligue o CAPS LOCK no teclado real e digite: BOLA. Depois desligue e digite: bola.</div><div class="digitacao"><div class="modelo frase">BOLA<br>bola</div><textarea id="capsTxt"></textarea><div class="aviso"><kbd>CAPS LOCK</kbd> deixa várias letras maiúsculas até ser desligado.</div><br><button class="okbtn" onclick="confereCaps()">Conferir</button></div>';document.getElementById('capsTxt').focus()
+}
+function confereCaps(){const v=document.getElementById('capsTxt').value.replace(/\r/g,'').trim();if(v==='BOLA\nbola'||v==='BOLA bola'){acerto(2);concluir('Você entendeu o CAPS LOCK!')}else{erro('Digite BOLA maiúsculo e depois bola minúsculo.');document.getElementById('capsTxt').focus()}}
+function fase24(){digitacaoLista('Nome com maiúscula','Digite seu primeiro nome com inicial maiúscula.',[cap(alunoSelecionado.primeiro)])}
+function fase25(){backspaceTreino('Backspace no final','Apague o erro no final usando BACKSPACE.',[{errado:'BOLAX',certo:'BOLA'},{errado:'CASAA',certo:'CASA'},{errado:'GATOO',certo:'GATO'},{errado:'PATOO',certo:'PATO'},{errado:'DADOO',certo:'DADO'}])}
+function fase26(){backspaceTreino('Backspace em sílabas','Apague o erro no final da sílaba.',[{errado:'BAX',certo:'BA'},{errado:'BEE',certo:'BE'},{errado:'COO',certo:'CO'},{errado:'PAA',certo:'PA'},{errado:'TAX',certo:'TA'}])}
+function backspaceTreino(titulo,sub,lista){let i=0;function mostrar(){const a=document.getElementById('area');a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+' Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo">'+lista[i].errado+'</div><input id="campoBack" value="'+lista[i].errado+'"><div class="aviso"><kbd>BACKSPACE</kbd> apaga o que está antes do cursor.</div><br><button class="okbtn" onclick="window.confereBack()">Conferir</button></div>';const inp=document.getElementById('campoBack');inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}window.confereBack=function(){const val=document.getElementById('campoBack').value;if(norm(val)===norm(lista[i].certo)){acerto();i++;if(i>=lista.length)concluir('Você corrigiu usando BACKSPACE!');else mostrar()}else{erro('Apague até ficar igual ao correto.');document.getElementById('campoBack').focus()}};mostrar()}
+function fase27(){deleteTreino('DELETE depois do cursor','Apague o símbolo depois do cursor usando DELETE.',[{texto:'A|X',certo:'A'},{texto:'B|2',certo:'B'},{texto:'M|Z',certo:'M'},{texto:'P|9',certo:'P'},{texto:'G|H',certo:'G'}])}
+function fase28(){deleteTreino('DELETE no meio','Apague a letra errada no meio usando DELETE.',[{texto:'BO|XLA',certo:'BOLA'},{texto:'CA|XSA',certo:'CASA'},{texto:'GA|XTO',certo:'GATO'},{texto:'PA|XTO',certo:'PATO'},{texto:'DA|XDO',certo:'DADO'}])}
+function deleteTreino(titulo,sub,lista){let i=0;function mostrar(){const item=lista[i];const valor=item.texto.replace('|','');const pos=item.texto.indexOf('|');const a=document.getElementById('area');a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+' Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo">'+item.texto.replace('|','<span class="cursor">|</span>')+'</div><input id="campoDel" value="'+valor+'"><div class="aviso"><kbd>DELETE</kbd> apaga o que está depois do cursor.</div><br><button class="okbtn" onclick="window.confereDel()">Conferir</button></div>';const inp=document.getElementById('campoDel');inp.focus();inp.setSelectionRange(pos,pos)}window.confereDel=function(){const val=document.getElementById('campoDel').value;if(norm(val)===norm(lista[i].certo)){acerto();i++;if(i>=lista.length)concluir('Você apagou usando DELETE!');else mostrar()}else{erro('Use DELETE para apagar depois do cursor.');document.getElementById('campoDel').focus()}};mostrar()}
+function fase29(){const a=document.getElementById('area');a.innerHTML='<div class="instrucao">Cursor e setas</div><div class="sub">Coloque o cursor entre A e B usando clique ou setas. Depois digite X.</div><div class="digitacao"><div class="modelo">A X B</div><input id="campoCursor" value="AB"><div class="aviso">Clique entre as letras ou use as setas ← →.</div><br><button class="okbtn" onclick="confereCursor()">Conferir</button></div>';const inp=document.getElementById('campoCursor');inp.focus();inp.setSelectionRange(1,1)}
+function confereCursor(){const val=document.getElementById('campoCursor').value;if(norm(val)===norm('AXB')){acerto(4);concluir('Você colocou letra no meio!')}else{erro('O resultado precisa ficar A X B.');document.getElementById('campoCursor').focus()}}
+function fase30(){paresClique('Função das teclas','Junte cada tecla com sua função.',[['ENTER','CONFIRMA'],['SHIFT','MAIÚSCULA'],['CAPS','MAIÚSCULAS'],['BACKSPACE','APAGA ANTES'],['DELETE','APAGA DEPOIS'],['ESPAÇO','SEPARA'],['NÚMEROS','1 2 3'],['LETRAS','PALAVRAS'],['SETAS','CURSOR'],['TECLADO','DIGITAR']])}
+function fase31(){digitacaoLista('Nome completo','Digite seu nome completo igual ao modelo.',[alunoSelecionado.completo])}
+function fase32(){
+ let i=0;const lista=['A','B','1','2','BA','BO','EU','USO','ENTER','SHIFT','CAPS','DELETE','BOLA','MEU NOME','TECLADO','FIM'];
+ function mostrar(){const a=document.getElementById('area');a.innerHTML='<div class="instrucao">Desafio final do teclado</div><div class="sub">Digite igual ao modelo e aperte ENTER. Item '+(i+1)+' de '+lista.length+'</div><div class="digitacao"><div class="modelo '+(lista[i].length>8?'frase':'')+'">'+lista[i]+'</div><input id="campoFinal"><div class="aviso">Digite e pressione <kbd>ENTER</kbd>.</div></div>';const inp=document.getElementById('campoFinal');inp.focus();inp.addEventListener('keydown',e=>{if(e.key==='Enter'){if(norm(inp.value)===norm(lista[i])){acerto();i++;if(i>=lista.length)concluir('Parabéns! Você concluiu o laboratório do teclado!');else mostrar()}else{erro('Digite igual ao modelo antes de apertar ENTER.');inp.select()}}})}
+ mostrar();
+}
+function paresClique(titulo,sub,pares){let feitos=0,selecionado=null;const a=document.getElementById('area');a.innerHTML='<div class="instrucao">'+titulo+'</div><div class="sub">'+sub+'</div><div class="grade" id="pares"></div>';const ops=[];pares.forEach((p,i)=>{ops.push({t:p[0],id:i});ops.push({t:p[1],id:i})});embaralhar(ops).forEach(x=>{const o=document.createElement('div');o.className='opcao '+(String(x.t).length>3?'palavra':'');o.textContent=x.t;o.dataset.id=x.id;o.onclick=()=>{if(o.classList.contains('ok'))return;if(!selecionado){selecionado=o;o.style.outline='6px solid #ffe36d';return}if(selecionado===o)return;if(selecionado.dataset.id===o.dataset.id){selecionado.classList.add('ok');o.classList.add('ok');selecionado.style.outline='';selecionado=null;feitos++;acerto();if(feitos===pares.length)concluir('Todos os pares foram encontrados!')}else{const ant=selecionado;o.classList.add('err');ant.classList.add('err');setTimeout(()=>{o.classList.remove('err');ant.classList.remove('err')},450);ant.style.outline='';selecionado=null;erro('Esse par não combina. Tente outro.')}};document.getElementById('pares').appendChild(o)})}
+function nivel(d){if(d.concluida&&d.erros<=1)return'Avançado';if(d.concluida&&d.erros<=4)return'Adequado';if(d.concluida)return'Em desenvolvimento';return'Precisa de apoio'}
+function obs(d){if(nivel(d)==='Avançado')return'Realizou com autonomia, boa atenção e precisão.';if(['Mapa','Números','Vogais','Consoantes','Linha','Mão','Caça','Letras'].some(x=>d.nome.includes(x)))return'Reforçar localização visual das teclas e reconhecimento por regiões do teclado.';if(d.nome.includes('ENTER'))return'Reforçar que ENTER confirma ou muda de linha.';if(d.nome.includes('SHIFT'))return'Reforçar uso do SHIFT para maiúsculas e símbolos.';if(d.nome.includes('CAPS'))return'Reforçar diferença entre SHIFT e CAPS LOCK.';if(d.nome.includes('Backspace'))return'Reforçar que BACKSPACE apaga o caractere anterior ao cursor.';if(d.nome.includes('DELETE'))return'Reforçar que DELETE apaga o caractere posterior ao cursor.';if(d.nome.includes('Espaço'))return'Reforçar uso da barra de espaço entre palavras.';if(d.nome.includes('Digite')||d.nome.includes('Nome'))return'Reforçar cópia atenta, localização das teclas e uso de espaço.';return'Reforçar atenção à instrução e controle do teclado.'}
+function finalizar(){atualizarTempo();document.getElementById('telaJogo').classList.add('oculto');document.getElementById('telaResultado').classList.remove('oculto');let totalTempo=0,totalErros=0,concluidas=0;const corpo=document.getElementById('corpoRelatorio');corpo.innerHTML='';let niveis={'Avançado':0,'Adequado':0,'Em desenvolvimento':0,'Precisa de apoio':0};for(let i=1;i<=TOTAL;i++){const d=relatorio[i];totalTempo+=d.tempo;totalErros+=d.erros;if(d.concluida)concluidas++;const n=nivel(d);niveis[n]++;const tr=document.createElement('tr');tr.innerHTML='<td>'+i+'</td><td>'+d.nome+(d.repeticoes?'<br><small>Repetiu '+d.repeticoes+' vez(es)</small>':'')+'</td><td>'+tempo(d.tempo)+'</td><td>'+d.acertos+' de '+metas[i]+'</td><td>'+d.erros+'</td><td><strong>'+n+'</strong></td><td>'+obs(d)+'</td>';corpo.appendChild(tr)}const nivelFinal=pontos>=56&&totalErros<=18?'Avançado':pontos>=46?'Adequado':pontos>=34?'Em desenvolvimento':'Precisa de apoio';document.getElementById('nomeResultado').textContent=alunoSelecionado.completo;document.getElementById('pontuacaoFinal').textContent=pontos;document.getElementById('maxPontos').textContent=TOTAL*PONTOS;document.getElementById('nivelFinal').textContent=nivelFinal;document.getElementById('dadosGerais').innerHTML='<p><strong>UNIVERSITAS, E-EI EF - 2026-1</strong><br>CURSO FUNDAMENTAL 1/5 ANOS - 1º Ano - Tarde - A<br>EDUCAÇÃO DIGITAL E COMPUTAÇÃO - 2º Bimestre</p><p><strong>Aluno:</strong> '+alunoSelecionado.completo+'</p><p><strong>Primeiro nome digitado na entrada:</strong> '+nomeDigitado+'</p><p><strong>Data:</strong> '+new Date().toLocaleString('pt-BR')+'</p><p><strong>Tempo total:</strong> '+tempo(totalTempo)+' · <strong>Fases concluídas:</strong> '+concluidas+' de '+TOTAL+' · <strong>Total de erros:</strong> '+totalErros+'</p>';document.getElementById('sinteseProfessor').innerHTML='<strong>Síntese:</strong><br>Avançado: '+niveis['Avançado']+' fase(s). Adequado: '+niveis['Adequado']+' fase(s). Em desenvolvimento: '+niveis['Em desenvolvimento']+' fase(s). Precisa de apoio: '+niveis['Precisa de apoio']+' fase(s).'}
+function reiniciarTudo(){document.getElementById('telaResultado').classList.add('oculto');document.getElementById('telaInicio').classList.remove('oculto');alunoSelecionado=null;nomeDigitado='';document.getElementById('btnAbrirNome').disabled=true;document.querySelectorAll('.aluno').forEach(x=>x.classList.remove('sel'))}
+document.getElementById('totalFases').textContent=TOTAL;montarAlunos();
+</script>
+</body>
+</html>
